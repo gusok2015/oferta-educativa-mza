@@ -1,0 +1,35 @@
+.university-card {
+  background-color: #212529; /* Dark background */
+  border-radius: 15px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  height: 100%;
+  border: 1px solid #495057;
+}
+
+.university-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.logo-placeholder {
+  width: 80px;
+  height: 80px;
+  background-color: #495057;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.logo-placeholder .fa-university {
+  color: #adb5bd;
+}
+
+.card-title {
+  font-weight: bold;
+}
