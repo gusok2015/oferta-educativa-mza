@@ -1,34 +1,50 @@
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { CareerArea } from '../data/testTypes';
+import { AreaResult } from '../data/types';
 
 const TestResult: React.FC = () => {
   const location = useLocation();
-  const scores: Record<CareerArea, number> = location.state?.scores;
+  const results: AreaResult[] = location.state?.results;
 
-  if (!scores) {
+  if (!results || results.length === 0) {
     return (
       <div className="container text-center mt-5">
         <h2>No se han encontrado resultados del test.</h2>
-        <Link to="/test" className="btn btn-primary mt-3">Realizar el Test</Link>
+        <p>Por favor, completa el test para descubrir tus áreas de interés.</p>
+        <Link to="/test" className="btn btn-primary mt-3">Realizar el Test Vocacional</Link>
       </div>
     );
   }
 
-  // Find the area with the highest score
-  const topArea = Object.keys(scores).reduce((a, b) => scores[a as CareerArea] > scores[b as CareerArea] ? a : b) as CareerArea;
-
   return (
-    <div className="container mt-5 text-center">
-      <h2>Resultado del Test</h2>
-      <div className="card bg-secondary text-white shadow-lg p-5">
-        <h4>Tu área de mayor afinidad es:</h4>
-        <h1 className="display-4 text-success my-3">{topArea}</h1>
-        <p className="lead">Te recomendamos explorar las carreras en esta área para ver cuáles se alinean con tus intereses.</p>
-        <div className="mt-4">
-          <Link to={`/?search=${encodeURIComponent(topArea)}`} className="btn btn-primary btn-lg mx-2">Ver Carreras de {topArea}</Link>
-          <Link to="/test" className="btn btn-secondary btn-lg mx-2">Hacer el test de nuevo</Link>
+    <div className="container mt-5">
+      <div className="text-center mb-5">
+        <h2 className="display-5">¡Estos son tus resultados!</h2>
+        <p className="lead text-muted">Hemos identificado las áreas que mejor se alinean con tus intereses y habilidades.</p>
+      </div>
+
+      {results.map((result, index) => (
+        <div key={index} className="card shadow-sm mb-4">
+          <div className="card-header bg-success text-white">
+            <h3 className="my-0 fw-normal">{index + 1}. {result.area}</h3>
+          </div>
+          <div className="card-body">
+            <p className="card-text">{result.description}</p>
+            <h5 className="mt-4">Carreras sugeridas en Mendoza:</h5>
+            <ul className="list-group list-group-flush">
+              {result.careers.map((career, i) => (
+                <li key={i} className="list-group-item d-flex justify-content-between align-items-center">
+                  {career.name}
+                  <span className="badge bg-secondary rounded-pill">{career.institution}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
+      ))}
+
+      <div className="text-center mt-5">
+        <Link to="/test" className="btn btn-lg btn-outline-primary">Hacer el test de nuevo</Link>
       </div>
     </div>
   );

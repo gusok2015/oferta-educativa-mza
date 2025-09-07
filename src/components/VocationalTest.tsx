@@ -1,45 +1,67 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { testQuestions } from '../data/testQuestions';
-import { CareerArea } from '../data/testTypes';
+import { vocationalTestQuestions } from '../data/testQuestions';
+import { testResults } from '../data/testResults';
+import { VocationalArea, Option, AreaResult } from '../data/types';
 
 const VocationalTest: React.FC = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [scores, setScores] = useState<Record<CareerArea, number>>({
-    'Tecnología': 0,
+  const [scores, setScores] = useState<Record<VocationalArea, number>>({
     'Ciencias de la Salud': 0,
-    'Ciencias Económicas': 0,
-    'Arquitectura y Diseño': 0,
-    'Ciencias Sociales': 0,
-    'Arte y Diseño': 0,
+    'Ingeniería y Tecnología': 0,
+    'Ciencias Sociales y Humanidades': 0,
+    'Ciencias Económicas y Empresariales': 0,
+    'Arte, Diseño y Comunicación': 0,
+    'Ciencias Exactas y Naturales': 0,
+    'Ciencias de la Educación': 0,
+    'Agropecuarias y Ambientales': 0,
   });
 
   const navigate = useNavigate();
 
-  const handleAnswer = (isYes: boolean) => {
-    if (isYes) {
-      const currentArea = testQuestions[currentQuestionIndex].area;
-      setScores(prevScores => ({
-        ...prevScores,
-        [currentArea]: prevScores[currentArea] + 1,
-      }));
-    }
+  const handleAnswer = (selectedOption: Option) => {
+    // Update scores based on the selected option's areas
+    const updatedScores = { ...scores };
+    selectedOption.areas.forEach(area => {
+      updatedScores[area] += 1;
+    });
+    setScores(updatedScores);
 
+    // Move to the next question or finish the test
     const nextQuestionIndex = currentQuestionIndex + 1;
-    if (nextQuestionIndex < testQuestions.length) {
+    if (nextQuestionIndex < vocationalTestQuestions.length) {
       setCurrentQuestionIndex(nextQuestionIndex);
     } else {
-      // Test finished, navigate to results page
-      navigate('/result', { state: { scores } });
+      // Test finished, process results and navigate
+      const finalResults = processResults(updatedScores);
+      navigate('/result', { state: { results: finalResults } });
     }
   };
 
-  const currentQuestion = testQuestions[currentQuestionIndex];
-  const progress = Math.round(((currentQuestionIndex + 1) / testQuestions.length) * 100);
+  const processResults = (finalScores: Record<VocationalArea, number>): AreaResult[] => {
+    const sortedAreas = (Object.keys(finalScores) as VocationalArea[]).sort(
+      (a, b) => finalScores[b] - finalScores[a]
+    );
+
+    // Get top 3 areas
+    const top3Areas = sortedAreas.slice(0, 3);
+
+    // Format results to include description and careers
+    return top3Areas.map(area => ({
+      area,
+      score: finalScores[area],
+      ...testResults[area],
+    }));
+  };
+
+  const currentQuestion = vocationalTestQuestions[currentQuestionIndex];
+  const progress = Math.round(((currentQuestionIndex + 1) / vocationalTestQuestions.length) * 100);
 
   return (
     <div className="container mt-5 text-center">
-      <h2>Test Vocacional</h2>
+      <h2 className="mb-4">Test Vocacional</h2>
+      <p className="lead mb-4">Descubre tus áreas de interés. ¡Responde con sinceridad!</p>
+      
       <div className="progress my-4">
         <div 
           className="progress-bar bg-success" 
@@ -52,11 +74,22 @@ const VocationalTest: React.FC = () => {
           {progress}%
         </div>
       </div>
-      <div className="card bg-secondary text-white shadow-lg p-5">
-        <h4>{currentQuestion.text}</h4>
-        <div className="mt-4">
-          <button className="btn btn-primary btn-lg mx-2" onClick={() => handleAnswer(true)}>Me interesa</button>
-          <button className="btn btn-danger btn-lg mx-2" onClick={() => handleAnswer(false)}>No me interesa</button>
+
+      <div className="card bg-light text-dark shadow-lg p-4">
+        <div className="card-body">
+          <h4 className="card-title">{currentQuestion.text}</h4>
+          <div className="list-group mt-4">
+            {currentQuestion.options.map((option, index) => (
+              <button 
+                key={index} 
+                type="button" 
+                className="list-group-item list-group-item-action text-start" 
+                onClick={() => handleAnswer(option)}
+              >
+                {option.text}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>
